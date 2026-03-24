@@ -3,7 +3,7 @@ from app.schemas import EmailRequest,EmailResponse
 from app.predictor import predict_email
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(tilte = "Spam Detection API")
+app = FastAPI(title = "Spam Detection API")
 
 app.add_middleware(
     CORSMiddleware,
