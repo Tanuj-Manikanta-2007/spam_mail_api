@@ -5,3 +5,5 @@ nltk
 python-dotenv
 scikit-learn
 joblib
+groq
+requests
