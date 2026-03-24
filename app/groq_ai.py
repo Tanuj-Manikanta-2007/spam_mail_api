@@ -4,18 +4,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize Groq clients with separate API keys
-SUMMARIZER_API_KEY = os.getenv("GROQ_SUMMARIZER_API_KEY")
-RESPONSE_API_KEY = os.getenv("GROQ_RESPONSE_API_KEY")
+SUMMARIZER_MODEL = os.getenv("GROQ_SUMMARIZER_MODEL", "llama-3.3-70b-versatile")
+RESPONSE_MODEL = os.getenv("GROQ_RESPONSE_MODEL", "llama-3.3-70b-versatile")
 
-if not SUMMARIZER_API_KEY:
-    raise ValueError("GROQ_SUMMARIZER_API_KEY environment variable is not set")
 
-if not RESPONSE_API_KEY:
-    raise ValueError("GROQ_RESPONSE_API_KEY environment variable is not set")
-
-summarizer_client = Groq(api_key=SUMMARIZER_API_KEY)
-response_client = Groq(api_key=RESPONSE_API_KEY)
+def _get_client_from_env(key_name: str) -> Groq:
+    api_key = os.getenv(key_name) or os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError(
+            f"{key_name} environment variable is not set (or set GROQ_API_KEY as fallback)"
+        )
+    return Groq(api_key=api_key)
 
 
 def summarize_text(text: str) -> str:
@@ -29,8 +28,9 @@ def summarize_text(text: str) -> str:
         The summarized text
     """
     try:
+        summarizer_client = _get_client_from_env("GROQ_SUMMARIZER_API_KEY")
         message = summarizer_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=SUMMARIZER_MODEL,
             max_tokens=1024,
             messages=[
                 {
@@ -56,12 +56,13 @@ def generate_ai_response(text: str, context: str = None) -> str:
         The AI-generated response
     """
     try:
+        response_client = _get_client_from_env("GROQ_RESPONSE_API_KEY")
         prompt = f"Generate a helpful and relevant response to the following:\n\n{text}"
         if context:
             prompt = f"Context: {context}\n\n{prompt}"
         
         message = response_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=RESPONSE_MODEL,
             max_tokens=1024,
             messages=[
                 {
